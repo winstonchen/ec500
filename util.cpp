@@ -12,6 +12,14 @@ double *make_grid(const int L)
 	return array;
 }
 
+void copy_grid(const double *from, double *to, const int L)
+{
+	const double max = L*L;
+	for (int i = 0; i < max; i++) {
+		to[i] = from[i];
+	}
+}
+
 int dump_grid(const double *grid, const int L, const char *filename)
 {
 	std::ofstream out(filename);

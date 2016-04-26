@@ -8,3 +8,5 @@ void set_boundary(double *T, const int L,
 
 void iterate_red_black(double *T, const double *b, const int L, const int iters, const double a);
 
+void conjugate_gradient(double *T, const double *b, const int L);
+
