@@ -28,6 +28,11 @@
 
 \newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
 
+\usepackage[noend]{algorithmic}
+\usepackage[boxed]{algorithm}
+\usepackage{url}
+\newcommand{\matr}[1]{\mathbf{#1}}
+
 \title{	
 \normalfont \normalsize 
 \textsc{Boston University} \\ [25pt] % Your university, school and/or department name(s)
@@ -51,6 +56,7 @@ In this project, we solve in two dimensions the heat equation
 
 \begin{equation}
 	\rho c_p {\partial T \over \partial t} - \nabla \cdot (k \nabla T) = \dot{q},
+	\label{eq:main}
 \end{equation}
 
 where
@@ -86,8 +92,48 @@ We now solve this problem using three different approaches:
 
 \section{Conjugate Gradient Method}
 
+In order to use conjugate gradient (CG), we must write our problem in the form $\matr{A}\vec{x} = \vec{b}$ for vectors $\vec{x}$, $\vec{b}$ and matrix $\matr{A}$. In this case, $\vec{x}$ will be our temperature $T$, $\vec{b}$ will be our volumetric heat flux $\dot{q}$ and $\matr{A}$ will encode the left-hand side of Equation \ref{eq:main}. Note that we take ${\partial T \over \partial t} = 0$ since we are only interested in the steady-state solution when using CG. We are therefore left with:
+
+\begin{equation}
+	\matr{A}T_{x,y} = 4T_{x,y} - (T_{x+1,y} + T_{x-1,y} + T_{x,y+1} + T_{x,y-1}) = \vec{b} = \dot{q}.
+	\label{eq:matrix}
+\end{equation}
+
+Note that we make the time variable $t$ implicit, since we no longer need it directly. The CG algorithm can now be applied as follows \footnote{Adapted from \url{https://en.wikipedia.org/wiki/Conjugate_gradient_method#The_resulting_algorithm}}:
+
+\begin{algorithm}[H]
+\caption{Conjugate gradient algorithm}
+\begin{algorithmic}
+	\REQUIRE{$\matr{A}$, $\vec{b}$, $\epsilon$}
+	\ENSURE{$T$}
+	\STATE $T \gets \vec{0}$
+	\STATE $\vec{r} \gets \vec{b} - \matr{A}T$  \COMMENT{residual}
+	\STATE $\vec{p} \gets \vec{r}$
+	\LOOP
+		\STATE $\alpha \gets \frac{|\vec{r}|}{\vec{p} \cdot \matr{A}\vec{p}}$
+		\STATE $T \gets T + \alpha \vec{p}$
+		\STATE $\vec{r}_{\mathrm{new}} \gets \vec{r} - \alpha\matr{A}\vec{p}$
+		\IF {$|\vec{r}_{\mathrm{new}}| < \epsilon$}
+			\RETURN $T$
+		\ENDIF
+		\STATE $\beta \gets \frac{|\vec{r}_{\mathrm{new}}|}{|\vec{r}|}$
+		\STATE $p \gets \vec{r}_{\mathrm{new}} + \beta\vec{p}$
+		\STATE $\vec{r} \gets \vec{r}_{\mathrm{new}}$
+	\ENDLOOP
+\end{algorithmic}
+\label{alg:cg}
+\end{algorithm}
+
+We take our initial guess $T_0$ to be zero everywhere. All that Algorithm \ref{alg:cg} requires us to have is a way to perform dot products and a way of applying $\matr{A}$ to a vector. The former is fairly trivial and the latter is given by Equation \ref{eq:matrix}. With these fundamental operations at hand, it is straightforward to implement Algorithm \ref{alg:cg} in code. \linebreak
+
+Quick note on boundary conditions: We incorporate our boundary conditions in $\vec{b}$ and apply $\matr{A}$ only to the interior points of $T$ -- that is, points that have exactly four neighbors.
+
+\subsection{Results}
+
+
 
 \section{Triangular Lattice}
+
 
 \end{document}
 
