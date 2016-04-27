@@ -1,7 +1,7 @@
-// g++ -o triangle-lattice triangleLattice.cpp -lrt
+// g++ -o tl_omp tl_omp.cpp -fopenmp -lrt
 #include <iostream>
 #include <cmath>
-#include <time.h>
+#include <omp.h>
 #include <cstdio>
 
 using namespace std;
@@ -21,18 +21,24 @@ void triangleLattice(double *x[], double *b[], int N)
             temp[x][y] = 0.0;
         }
     }
+    int i, j;
+    omp_set_num_threads(8);
     while (!done){
         double res = 0.0;
         iters++;
-        for(int i = 1; i < N-1; i++){
-        	for(int j = 1; j < N-1; j++){
+        #pragma omp parallel shared(temp, b, x, N) private(i,j)
+        #pragma omp for
+        for(i = 1; i < N-1; i++){
+        	for(j = 1; j < N-1; j++){
         		//temp[i] = (0.5 * x[i]) + (0.5/2) * (x[i+1] + x[i-1]);
         		temp[i][j] = (b[i][j]) + ((1.0/6.0) * (x[i-1][j+1] + x[i-1][j] + x[i][j+1] + x[i][j-1] + x[i+1][j] + x[i+1][j-1]));
         	}
         }
         //residue
-        for(int i = 0; i < N; i++){ 
-        	for(int j = 0; j < N; j++){
+        #pragma omp parallel shared(temp, res, x, N) private(i,j)
+        #pragma omp for
+        for(i = 0; i < N; i++){ 
+        	for(j = 0; j < N; j++){
         		res += ( (x[i][j]  - temp[i][j]) * (x[i][j] - temp[i][j]) );
             	x[i][j] = temp[i][j];
         	}
@@ -71,7 +77,7 @@ int main()
     triangleLattice(x,b,N);
     clock_gettime(CLOCK_MONOTONIC, &time2);
     double testTime = timeInSeconds(&time2)-timeInSeconds(&time1);
-    printf("time: %lf secs \n", testTime);
+    printf("time: %lf secs\n", testTime);
   	// for(int i = 0; i < N; i++){
   	// 	for(int j = 0; j < N; j++){
   	// 		cout << x[i][j] << ",";
