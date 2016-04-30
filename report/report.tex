@@ -31,6 +31,8 @@
 \usepackage[noend]{algorithmic}
 \usepackage[boxed]{algorithm}
 \usepackage{url}
+\usepackage{subfigure}
+\usepackage{placeins}
 \newcommand{\matr}[1]{\mathbf{#1}}
 
 \title{	
@@ -65,7 +67,7 @@ where
 	\item $k$ is a constant taken to be $1$,
 	\item $\rho$ is the density of the medium (assumed to be constant),
 	\item $c_p$ is the specific heat of the medium (assumed to be constant),
-	\item $\dot{q}$ is the volumetric heat flux as a function of spacial coordinates $(x,y)$, and
+	\item $\dot{q}$ is the heat flux as a function of spacial coordinates $(x,y)$, and
 	\item $T$ is the temperature of the material as a function of spatial coordinates $(x,y)$ and of time $t$.
 \end{itemize}
 
@@ -92,7 +94,7 @@ We now solve this problem using three different approaches:
 
 \section{Conjugate Gradient Method}
 
-In order to use conjugate gradient (CG), we must write our problem in the form $\matr{A}\vec{x} = \vec{b}$ for vectors $\vec{x}$, $\vec{b}$ and matrix $\matr{A}$. In this case, $\vec{x}$ will be our temperature $T$, $\vec{b}$ will be our volumetric heat flux $\dot{q}$ and $\matr{A}$ will encode the left-hand side of Equation \ref{eq:main}. Note that we take ${\partial T \over \partial t} = 0$ since we are only interested in the steady-state solution when using CG. We are therefore left with:
+In order to use conjugate gradient (CG), we must write our problem in the form $\matr{A}\vec{x} = \vec{b}$ for vectors $\vec{x}$, $\vec{b}$ and matrix $\matr{A}$. In this case, $\vec{x}$ will be our temperature $T$, $\vec{b}$ will be our heat flux $\dot{q}$ and $\matr{A}$ will encode the left-hand side of Equation \ref{eq:main}. Note that we take ${\partial T \over \partial t} = 0$ since we are only interested in the steady-state solution when using CG. We are therefore left with:
 
 \begin{equation}
 	\matr{A}T_{x,y} = 4T_{x,y} - (T_{x+1,y} + T_{x-1,y} + T_{x,y+1} + T_{x,y-1}) = \vec{b} = \dot{q}.
@@ -130,10 +132,40 @@ Quick note on boundary conditions: We incorporate our boundary conditions in $\v
 
 \subsection{Results}
 
+\begin{figure}
+\centering
+\includegraphics[width=400px]{heatmap1.eps}
+\caption{Final heat map for system with two point sources as shown, with boundaries fixed at zero. The point sources are equal in magnitude but opposite in sign.}
+\label{fig:cgheatmap}
+\end{figure}
+
+\begin{figure}
+\centering
+\subfigure[$k = 1$]{\includegraphics[width=60mm]{step_1.eps}}
+\subfigure[$k = 2$]{\includegraphics[width=60mm]{step_2.eps}}
+\hfill
+\subfigure[$k = 3$]{\includegraphics[width=60mm]{step_3.eps}}
+\subfigure[$k = 4$]{\includegraphics[width=60mm]{step_4.eps}}
+\caption{First four steps of conjugate gradient algorithm for system with a single point source in the center.}
+\label{fig:cgsteps}
+\end{figure}
+
+Figure \ref{fig:cgheatmap} shows the result of applying the CG algorithm to a system with two opposite point sources on a 200-by-200 grid. The boundaries were fixed at zero and a residual tolerance of $10^{-6}$ was used. It is also instructive to view the result after each of the first few iterations of the main loop in Algorithm \ref{alg:cg}. Consider a simpler system with a single point source in the center on a 20-by-20 grid. The result after the first four iterations is shown in Figure \ref{fig:cgsteps}. We can see from this figure how information propagates neighbor-by-neighbor from the source to the surrounding points. This makes sense since, by Equation \ref{eq:matrix}, each non-zero point can only influence its closest neighbors on each iteration.
 
 
 \section{Triangular Lattice}
 
+
+\section{Miscellaneous}
+\subsection{Code}
+The code for our project can be found at \url{https://github.com/winstonchen/ec500}.
+
+\subsection{Contributions}
+\begin{itemize}
+	\item Ariya Shajii -- Conjugate gradient
+	\item Huy Le -- Parallelized red-black iteration
+	\item Winston Chen -- Triangular lattice
+\end{itemize}
 
 \end{document}
 
