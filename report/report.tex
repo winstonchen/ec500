@@ -150,8 +150,17 @@ Quick note on boundary conditions: We incorporate our boundary conditions in $\v
 \label{fig:cgsteps}
 \end{figure}
 
-Figure \ref{fig:cgheatmap} shows the result of applying the CG algorithm to a system with two opposite point sources on a 200-by-200 grid. The boundaries were fixed at zero and a residual tolerance of $10^{-6}$ was used. It is also instructive to view the result after each of the first few iterations of the main loop in Algorithm \ref{alg:cg}. Consider a simpler system with a single point source in the center on a 20-by-20 grid. The result after the first four iterations is shown in Figure \ref{fig:cgsteps}. We can see from this figure how information propagates neighbor-by-neighbor from the source to the surrounding points. This makes sense since, by Equation \ref{eq:matrix}, each non-zero point can only influence its closest neighbors on each iteration.
+\begin{figure}
+\centering
+\includegraphics[width=400px]{cg_timings.eps}
+\caption{Timings for conjugate gradient as compared to Gauss-Seidel iteration for a system with a single point source in the center and a tolerance of $10^{-6}$.}
+\label{fig:cgtimings}
+\end{figure}
 
+Figure \ref{fig:cgheatmap} shows the result of applying the CG algorithm to a system with two opposite point sources on a 200-by-200 grid. The boundaries were fixed at zero and a residual tolerance of $10^{-6}$ was used. It is also instructive to view the result after each of the first few iterations of the main loop in Algorithm \ref{alg:cg}. Consider a simpler system with a single point source in the center on a 20-by-20 grid. The result after the first four iterations is shown in Figure \ref{fig:cgsteps}. We can see from this figure how information propagates neighbor-by-neighbor from the source to the surrounding points. This makes sense since, by Equation \ref{eq:matrix}, each non-zero point can only influence its closest neighbors on each iteration.
+\linebreak
+
+Finally, we compared timings of our conjugate gradient implementation to Gauss-Seidel iteration for several grid sizes, as shown in Figure \ref{fig:cgtimings}. Clearly, conjugate gradient is a substantial algorithmic improvement over Gauss-Seidel.
 
 \section{Triangular Lattice}
 
