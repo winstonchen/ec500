@@ -1,11 +1,17 @@
+/*
+ * heat_mpi.cpp
+ * make
+ * mpirun -n 4 ./heat_mpi
+ */
+
 # include <stdlib.h>
 # include <stdio.h>
 # include <math.h>
 
 # include "mpi.h"
 
-# define n 48
-# define nodeedge 24
+# define n 200
+# define nodeedge 200
 # define nblock n/nodeedge
 # define nproc nblock*nblock
 
@@ -345,12 +351,12 @@ void iterate ( double w, double M[][nodeedge+2], double result[][n], int rank,
     exchange ( M, comm, rank );
     doblack ( w, M );
 
-    if ( 5000 < it )
+    if ( 10000 < it )
     {
       done = 1;
     }
 
-    if ( ( it % (int) 20.0 == 0.0 ) && ( done != 1 ) )
+    if ( ( it % 20 == 0 ) && ( done != 1 ) )
     { 
       diff = 0.0;
       for ( i = 1; i <= nodeedge; i++ )
