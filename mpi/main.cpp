@@ -66,8 +66,8 @@ int main(int argc, char *argv[])
 	//GRID_GET(b, 3*L/4, L/4, L) = 1;
 	//GRID_GET(b, L/4, 3*L/4, L) = 1;
 	// GRID_GET(b, 3*L/4, 3*L/4, L) = 1;
-	GRID_GET(b, (L/nproc + 2)/4, (L/nproc + 2)/4, (L/nproc + 2)) = 1;
-	GRID_GET(b, 3*(L/nproc + 2)/4, 3*(L/nproc + 2)/4, (L/nproc + 2)) = 1;
+	GRID_GET(b, (L/nproc + 2)/4, L/4, (L/nproc + 2)) = 1;
+	GRID_GET(b, 3*(L/nproc + 2)/4, 3*L/4, (L/nproc + 2)) = 1;
 
     /*
 	set_boundary(b, L, horizontal_boundary, vertical_boundary, horizontal_boundary, vertical_boundary);
