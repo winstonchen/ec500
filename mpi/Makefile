@@ -5,7 +5,7 @@ TARGET	=  heat_mpi
 
 C_SOURCES =  main.cpp util.cpp core.cpp
 C_OBJS     =  main.o util.o core.o
-MY_INCLUDES =  
+MY_INCLUDES =  main.h util.h core.h
 
 
 CCX = mpic++
