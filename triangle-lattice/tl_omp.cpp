@@ -21,7 +21,7 @@ void triangleLattice(double *x[], double *b[], int N)
             temp[x][y] = 0.0;
         }
     }
-    omp_set_num_threads(4);
+    omp_set_num_threads(1);
     int i, j;
     while (!done){
         double res = 0.0;
@@ -58,7 +58,7 @@ void triangleLattice(double *x[], double *b[], int N)
 int main()
 {
     struct timespec time1, time2;
-	int N = 300; 
+	int N = 200; 
 	double *x[N], *b[N];
     for(int a = 0; a < N; a++){
         x[a] = new double[N];

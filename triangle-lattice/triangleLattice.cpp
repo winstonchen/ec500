@@ -52,7 +52,7 @@ void triangleLattice(double *x[], double *b[], int N)
 int main()
 {
     struct timespec time1, time2;
-	int N = 300; 
+	int N = 50; 
 	double *x[N], *b[N];
     for(int a = 0; a < N; a++){
         x[a] = new double[N];
