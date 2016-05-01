@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
@@ -28,7 +29,7 @@ static double horizontal_boundary(double x)
 */
 
 
-int main()
+int main(int argc, char *argv[])
 {
 	int nproc;
 	int rank;
@@ -106,6 +107,9 @@ int main()
  	double* ghostf_r = new double[L];
   	double* ghostb_r = new double[L];
 
+  	double iters = 10000;
+  	double a = 0.5;
+
 	for (int i = 0; i < iters; i++) {
 		/* red */
 		// for (int x = 1; x < max; x++) {
@@ -126,9 +130,9 @@ int main()
 
 		/* black */
 		// for (int x = 1; x < max; x++) {
-		for (int x = 1; x < siz / nproc + 2 - 1; x++) {
+		for (int x = 1; x < L / nproc + 2 - 1; x++) {
 			// for (int y = 1; y < max; y++) {
-			for (int y = 1; y < siz - 1; y++) {
+			for (int y = 1; y < L - 1; y++) {
 				if ((x + y)%2 == 1)
 					continue;
 
@@ -155,11 +159,11 @@ int main()
 
 		cout<<ghostb_r[0]<<" "<<ghostf_s[0]<<endl;
 
-		MPI_Isend(&ghostf_s, siz, MPI_DOUBLE, rf , tag1, MPI_COMM_WORLD, &request[0]);
+		MPI_Isend(&ghostf_s, L, MPI_DOUBLE, rf , tag1, MPI_COMM_WORLD, &request[0]);
 		cout<<"Proc " <<rank<<" sending to  "<<rf<<" with tag "<<tag1<<endl;
-		MPI_Isend(&ghostb_s, siz, MPI_DOUBLE, rb , tag2, MPI_COMM_WORLD, &request[1]);
-		MPI_Irecv(&ghostf_r, siz, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
-		MPI_Irecv(&ghostb_r, siz, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
+		MPI_Isend(&ghostb_s, L, MPI_DOUBLE, rb , tag2, MPI_COMM_WORLD, &request[1]);
+		MPI_Irecv(&ghostf_r, L, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
+		MPI_Irecv(&ghostb_r, L, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
 		cout<<"Proc " <<rank<<" recv from  "<<rb<<" with tag "<<tag1<<endl;
 
 		MPI_Waitall(4, request, Stat);
