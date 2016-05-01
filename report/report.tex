@@ -33,6 +33,7 @@
 \usepackage{url}
 \usepackage{subfigure}
 \usepackage{placeins}
+\usepackage{adjustbox}
 \newcommand{\matr}[1]{\mathbf{#1}}
 
 \title{	
@@ -89,7 +90,7 @@ We now solve this problem using three different approaches:
 \end{itemize}
 
 
-\section{Parallelized Red-Black}
+\section{Parallelized Red-Black Iteration}
 
 
 \section{Conjugate Gradient Method}
@@ -134,7 +135,7 @@ Quick note on boundary conditions: We incorporate our boundary conditions in $\v
 
 \begin{figure}
 \centering
-\includegraphics[width=400px]{heatmap1.eps}
+\includegraphics[width=120mm]{heatmap1.eps}
 \caption{Final heat map for system with two point sources as shown, with boundaries fixed at zero. The point sources are equal in magnitude but opposite in sign.}
 \label{fig:cgheatmap}
 \end{figure}
@@ -150,10 +151,74 @@ Quick note on boundary conditions: We incorporate our boundary conditions in $\v
 \label{fig:cgsteps}
 \end{figure}
 
+\begin{figure}
+\centering
+\includegraphics[width=120mm]{cg_timings.eps}
+\caption{Timings for conjugate gradient as compared to Gauss-Seidel iteration for a system with a single point source in the center and a tolerance of $10^{-6}$.}
+\label{fig:cgtimings}
+\end{figure}
+
 Figure \ref{fig:cgheatmap} shows the result of applying the CG algorithm to a system with two opposite point sources on a 200-by-200 grid. The boundaries were fixed at zero and a residual tolerance of $10^{-6}$ was used. It is also instructive to view the result after each of the first few iterations of the main loop in Algorithm \ref{alg:cg}. Consider a simpler system with a single point source in the center on a 20-by-20 grid. The result after the first four iterations is shown in Figure \ref{fig:cgsteps}. We can see from this figure how information propagates neighbor-by-neighbor from the source to the surrounding points. This makes sense since, by Equation \ref{eq:matrix}, each non-zero point can only influence its closest neighbors on each iteration.
+\linebreak
+
+Finally, we compared timings of our conjugate gradient implementation to Gauss-Seidel iteration for several grid sizes, as shown in Figure \ref{fig:cgtimings}. Clearly, conjugate gradient is a substantial algorithmic improvement over Gauss-Seidel.
 
 
 \section{Triangular Lattice}
+
+\begin{figure}
+\centering
+\includegraphics[width=120mm]{tl.eps}
+\caption{Visualization of a triangular lattice.}
+\label{fig:tl}
+\end{figure}
+
+The triangular (or hexagonal) lattice algorithm is similar to the square lattice method used in successive over-relaxation (SOR). Figure \ref{fig:tl} shows a graphical visualization of a triangular lattice. While the iterative equation for a square lattice with relaxation parameter $1$ is
+
+\begin{equation}
+	T_{x,y} \gets {T_{x+1,y} + T_{x-1,y} + T_{x,y+1} + T_{x,y-1} \over 4} + \dot{q}_{x,y},
+\end{equation}
+
+the equivalent equation for a triangular lattice is
+
+\begin{equation}
+	T_{x,y} \gets {T_{x+1,y} + T_{x-1,y} + T_{x,y+1} + T_{x,y-1} + T_{x+1,y+1} + T_{x-1,y-1} \over 6} + \dot{q}_{x,y}.
+\end{equation}
+
+\subsection{Results}
+
+\begin{table}[h, scale=0.4]
+\centering
+\caption{Table of runtimes for parallelized Jacobi iteration on a triangular lattice for system with a single point source in the center and a tolerance of $10^{-6}$. All times are given in seconds}
+\label{tab:tltimings}
+\begin{adjustbox}{max width=\textwidth}
+\begin{tabular}{l|r|r|r|r|r|r|r|}
+\cline{2-8}
+                                          & \multicolumn{7}{c|}{\textbf{Threads}}                                                                                                                                                                                                                        \\ \hline
+\multicolumn{1}{|c|}{\textbf{Grid width}} & \multicolumn{1}{c|}{\textbf{Baseline (serial)}} & \multicolumn{1}{c|}{\textbf{1}} & \multicolumn{1}{c|}{\textbf{2}} & \multicolumn{1}{c|}{\textbf{4}} & \multicolumn{1}{c|}{\textbf{6}} & \multicolumn{1}{c|}{\textbf{8}} & \multicolumn{1}{c|}{\textbf{12}} \\ \hline
+\multicolumn{1}{|l|}{50}                  & 0.215                                           & 0.237                           & 0.199                           & 0.154                           & 0.154                           & 0.151                           & 0.157                            \\ \hline
+\multicolumn{1}{|l|}{100}                 & 3.359                                           & 3.711                           & 2.989                           & 2.300                           & 2.170                           & 2.087                           & 2.088                            \\ \hline
+\multicolumn{1}{|l|}{200}                 & 51.066                                          & 56.330                          & 45.299                          & 34.489                          & 32.494                          & 30.970                          & 29.947                           \\ \hline
+\multicolumn{1}{|l|}{300}                 & 248.500                                         & 274.343                         & 223.119                         & 173.063                         & 162.174                         & 153.766                         & 145.72                           \\ \hline
+\end{tabular}
+\end{adjustbox}
+\end{table}
+
+\begin{figure}
+\centering
+\includegraphics[width=120mm]{tl_timings.eps}
+\caption{Plot of timings given in Table \ref{tab:tltimings}.}
+\label{fig:tltimings}
+\end{figure}
+
+\begin{figure}
+\centering
+\includegraphics[width=120mm]{tl_heatmap.eps}
+\caption{Result of applying Jacobi iteration to a system with a single point source at the center on a triangular lattice. Note that the asymmetry is an artifact of how the result is being plotted, since a shear must be applied to use standard plotting methods.}
+\label{fig:tlheatmap}
+\end{figure}
+
+Different methods can be used to implement a triangular lattice algorithm, such as Jacobi, Gauss-Seidel and Red-Black. Jacobi's method is used here to implement multithreading with OpenMP. The timings of our implementation for various numbers of threads is given in Table \ref{tab:tltimings} and plotted in Figure \ref{fig:tltimings}.
 
 
 \section{Miscellaneous}
