@@ -1,30 +1,39 @@
-TARGET = heatsim
-LIBS = -lm -lpthread -fopenmp
-CC = g++
-WARNINGS = -Wall -Wextra -Werror
-CFLAGS = -g -pedantic -pedantic-errors -fstrict-aliasing -fopenmp $(WARNINGS)
+.SUFFIXES:
+.SUFFIXES: .o .c
+#============================================================
+TARGET	=  heat_mpi
 
-SRCDIR = .
-OBJDIR = obj
-INCDIR = .
+C_SOURCES =  main.cpp util.cpp core.cpp
+C_OBJS     =  main.o util.o core.o
+MY_INCLUDES =  
 
-.PHONY: default all clean
 
-default: $(TARGET)
-all: default
+CCX = mpic++
+CXXFLAGS = -g -Wall
+LIBDIRS = -lm
 
-OBJECTS = $(patsubst $(SRCDIR)/%.cpp, $(OBJDIR)/%.o, $(wildcard $(SRCDIR)/*.cpp))
-HEADERS = $(wildcard $(INCDIR)/*.h)
+#============================================================
+all: $(TARGET)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.cpp $(HEADERS)
-	$(CC) $(CFLAGS) -I$(INCDIR) -c $< -o $@
+.o:.cpp	$(MY_INCLUDES)
+	$(CCX)  -c  $(CXXFLAGS) $<  
 
-.PRECIOUS: $(TARGET) $(OBJECTS)
+$(TARGET) :   $(C_OBJS)
+	$(CCX) $(CXXFLAGS)  $^ $(LIBDIRS)  -o $@
 
-$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) $(LIBS) -o $@
+# Implicit rules: $@ = target name, $< = first prerequisite name, $^ = name of all prerequisites
+#============================================================
+
+ALL_SOURCES = Makefile $(C_SOURCES) $(MY_INCLUDES)
+
 
 clean:
-	-rm -f *.o
+	rm -f $(TARGET) $(C_OBJS) core 
+
+tar: $(ALL_SOURCES) $(NOTES)
+	tar cvf $(TARGET).tar $(ALL_SOURCES)
+
+$(TARGET).ps: $(ALL SOURCES)
+	enscript -pcode.ps $(ALL_SOURCES)
 
 
