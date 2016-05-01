@@ -163,6 +163,7 @@ int main(int argc, char *argv[])
 		MPI_Isend(&ghostf_s, L, MPI_DOUBLE, rf , tag1, MPI_COMM_WORLD, &request[0]);
 		cout<<"Proc " <<rank<<" sending to  "<<rf<<" with tag "<<tag1<<endl;
 		MPI_Isend(&ghostb_s, L, MPI_DOUBLE, rb , tag2, MPI_COMM_WORLD, &request[1]);
+		
 		MPI_Irecv(&ghostf_r, L, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
 		MPI_Irecv(&ghostb_r, L, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
 		cout<<"Proc " <<rank<<" recv from  "<<rb<<" with tag "<<tag1<<endl;
@@ -180,6 +181,8 @@ int main(int argc, char *argv[])
 
 		cout<<"Copied"<<endl;
 	}
+
+	MPI_Barrier(MPI_COMM_WORLD);
 
 	dump_grid(T, L/nproc + 2, L, "out.csv");
 }
