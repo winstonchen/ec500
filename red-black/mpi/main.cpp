@@ -103,10 +103,10 @@ int main(int argc, char *argv[])
 	// void iterate_red_black(double *T, const double *b, const int L, const int iters, const double a)
 	// const int max = L-1;
 
-	double* ghostf_s = new double[L];
-  	double* ghostb_s = new double[L];
- 	double* ghostf_r = new double[L];
-  	double* ghostb_r = new double[L];
+	double* array1 = new double[L];
+  	double* array2 = new double[L];
+ 	double* array3 = new double[L];
+  	double* array4 = new double[L];
 
   	double iters = 10000;
   	double a = 0.5;
@@ -147,39 +147,40 @@ int main(int argc, char *argv[])
 		}
 
 	  	for (int i = 0; i < L; i++) {
-	  		ghostb_s[i] = GRID_GET(T, 1, i, L / nproc + 2 - 1);
-	  		ghostf_s[i] = GRID_GET(T, L / nproc, i, L / nproc + 2 - 1);
+	  		array2[i] = GRID_GET(T, 1, i, L / nproc + 2 - 1);
+	  		array1[i] = GRID_GET(T, L / nproc, i, L / nproc + 2 - 1);
 	  	}
 
 		int rf = (rank + 1) % nproc;
 		int rb = (rank - 1) % nproc;
-		if (rb < 0) rb = nproc - 1;
+		if (rb < 0) {
+			rb = nproc - 1;
+		}
 
 		int tag1 = 1;
 		int tag2 = 2;
 
-		cout<<ghostb_r[0]<<" "<<ghostf_s[0]<<endl;
+		cout<<array4[0] << " " << array1[0] << endl;
 
-		MPI_Isend(&ghostf_s, L, MPI_DOUBLE, rf , tag1, MPI_COMM_WORLD, &request[0]);
-		cout<<"Proc " <<rank<<" sending to  "<<rf<<" with tag "<<tag1<<endl;
-		MPI_Isend(&ghostb_s, L, MPI_DOUBLE, rb , tag2, MPI_COMM_WORLD, &request[1]);
+		MPI_Isend(&array1, L, MPI_DOUBLE, rf , tag1, MPI_COMM_WORLD, &request[0]);
+		cout << "SEND: " << rank << " " << rb <<  " " << tag1 <<endl;
+		MPI_Isend(&array2, L, MPI_DOUBLE, rb , tag2, MPI_COMM_WORLD, &request[1]);
 		
-		MPI_Irecv(&ghostf_r, L, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
-		MPI_Irecv(&ghostb_r, L, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
-		cout<<"Proc " <<rank<<" recv from  "<<rb<<" with tag "<<tag1<<endl;
+		MPI_Irecv(&array3, L, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
+		MPI_Irecv(&array4, L, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
+		cout << "RECV: " rank << " " << rb <<  " " << tag1 <<endl;
 
 		MPI_Waitall(4, request, Stat);
-
-		cout<<"Received"<<endl;
-    	cout<<ghostb_r[0]<<" "<<ghostf_s[0]<<endl;
+		cout << "RECEIVED " << endl;
+    	cout << array4[0] << " " << array1[0] <<endl;
 
 	 	for (int i = 0; i < L; i++) {
-	 		cout << rank << "in for loop " <<ghostf_r[i] << " " << ghostb_r[i] << endl;
-	 		GRID_GET(T, 0, i, L/nproc + 2) = ghostf_r[i];
-	 		GRID_GET(T, L/nproc + 1, i, L/nproc + 2) = ghostb_r[i];
+	 		cout << rank << " " << array3[i] << " " << array4[i] << endl;
+	 		GRID_GET(T, 0, i, L/nproc + 2) = array3[i];
+	 		GRID_GET(T, L/nproc + 1, i, L/nproc + 2) = array4[i];
 	 	}
 
-		cout<<"Copied"<<endl;
+		cout << "COPIED" << endl;
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);

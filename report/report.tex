@@ -91,7 +91,29 @@ We now solve this problem using three different approaches:
 
 
 \section{Parallelized Red-Black Iteration}
+When solving a system of linear equations in terms of the Gauss-Seidel and SOR methods, the order in which the variables are processed matter. A common ordering that can be used to solve the heat equation is red-black. The motivation for red-black is to order the nodes with flexibility for parallel implementation. Thinking of the matrix as a checkerboard, every red node only has black node as its neighbors and every black node only has red nodes as neighbors to its north, south, east, and west.
 
+Each processor uses MPI to send its leftmost solution value to its left neighbor, and its rightmost solution value to its rightmost neighbor. Of course, each processor must then also receive the corresponding information that its neighbors send to it. (However, the first and last processor only have one neighbor, and use boundary condition information to determine the behavior of the solution at the node which is not next to another processor's node.)
+
+The naive way of setting up the information exchange works, but can be inefficient, since each processor sends a message and then waits for confirmation of receipt, which can't happen until some processor has moved to the "receive" stage, which only happens because the first or last processor doesn't have to receive information on a given step.
+
+\subsection{Results}
+
+6 x86 nodes	Intel(R) Xeon (R) CPU 5140 @ 2.33 GHz	4	None
+
+
+Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
+Grid width O3 serial OpenMP 1 OpenMP 2 OpenMP 4 OpenMP 6 OpenMP 8
+200	1.777515 5.744814 6.312971 4.074393 2.879406 3.249713 3.070884
+300 13.802623 14.530238 9.351418 5.852037 6.279566 5.192502
+400 26.119645 27.859169 16.943005 9.666216 10.646720 9.225139 
+500 47.987774 53.261593 26.744942 16.256034 17.950182 15.714957
+
+\begin{figure}
+\includegraphics[width=60mm]{heatmap.png}
+\caption{Result of applying red-black iteration.}
+\label{fig:heatmap}
+\end{figure}
 
 \section{Conjugate Gradient Method}
 
