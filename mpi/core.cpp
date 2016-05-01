@@ -111,6 +111,7 @@ static double get_residual(const double *T, const double *b, double *r, const do
 	return sqrt(res_mag);
 }
 
+/*
 void conjugate_gradient(double *T, const double *b, const int L)
 {
 	double *r = make_grid(L);
@@ -155,5 +156,5 @@ void conjugate_gradient(double *T, const double *b, const int L)
 	delete[] p;
 	delete[] A_p;
 }
-
+*/
 

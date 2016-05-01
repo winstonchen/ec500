@@ -1,14 +1,14 @@
 .SUFFIXES:
-.SUFFIXES: .o .c
+.SUFFIXES: .o .cpp
 #============================================================
 TARGET	=  heat_mpi
 
-C_SOURCES =  heat_mpi.c
+C_SOURCES =  heat_mpi.cpp
 C_OBJS     =  heat_mpi.o
 MY_INCLUDES =  
 
 
-CCX = mpicc
+CCX = mpic++
 CXXFLAGS = -g -Wall
 LIBDIRS = -lm
 
