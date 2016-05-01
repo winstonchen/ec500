@@ -4,9 +4,9 @@
 #include <fstream>
 #include "util.h"
 
-double *make_grid(const int L)
+double *make_grid(const int L, const int L2)
 {
-	const size_t size = L*L;
+	const size_t size = L*L2;
 	double *array = new double[size];
 	memset(array, 0, size*sizeof(double));
 	return array;
@@ -20,7 +20,7 @@ void copy_grid(const double *from, double *to, const int L)
 	}
 }
 
-int dump_grid(const double *grid, const int L, const char *filename)
+int dump_grid(const double *grid, const int L, const int L2, const char *filename)
 {
 	std::ofstream out(filename);
 
@@ -29,7 +29,7 @@ int dump_grid(const double *grid, const int L, const char *filename)
 	}
 
 	for (int x = 0; x < L; x++) {
-		for (int y = 0; y < L; y++) {
+		for (int y = 0; y < L2; y++) {
 			out << x << ',' << y << ',' << GRID_GET(grid, x, y, L) << std::endl;
 		}
 	}
