@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <iostream>
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
 			}
 		}
 
-	  	for (int i = 0; i < siz; i++) {
+	  	for (int i = 0; i < L; i++) {
 	  		ghostb_s[i] = GRID_GET(T, 1, i, L / nproc + 2 - 1);
 	  		ghostf_s[i] = GRID_GET(T, L / nproc, i, L / nproc + 2 - 1);
 	  	}
