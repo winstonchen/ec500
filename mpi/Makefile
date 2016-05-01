@@ -1,5 +1,5 @@
 .SUFFIXES:
-.SUFFIXES: .o .c
+.SUFFIXES: .o .cpp
 #============================================================
 TARGET	=  heat_mpi
 
