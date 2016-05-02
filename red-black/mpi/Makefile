@@ -7,7 +7,7 @@ C_SOURCES =  main.cpp util.cpp core.cpp
 C_OBJS     =   main.o util.o core.o
 MY_INCLUDES =  core.h util.h
 
-CCX = mpic++
+CCX = mpicxx
 CXXFLAGS = -g -Wall
 
 #============================================================
