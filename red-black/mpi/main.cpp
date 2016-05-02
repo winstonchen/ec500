@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 		
 		MPI_Irecv(&array3, L, MPI_DOUBLE, rf , tag2, MPI_COMM_WORLD, &request[2]);
 		MPI_Irecv(&array4, L, MPI_DOUBLE, rb , tag1, MPI_COMM_WORLD, &request[3]);
-		cout << "RECV: " rank << " " << rb <<  " " << tag1 <<endl;
+		cout << "RECV: " << rank << " " << rb <<  " " << tag1 <<endl;
 
 		MPI_Waitall(4, request, Stat);
 		cout << "RECEIVED " << endl;

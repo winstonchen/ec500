@@ -91,28 +91,62 @@ We now solve this problem using three different approaches:
 
 
 \section{Parallelized Red-Black Iteration}
-When solving a system of linear equations in terms of the Gauss-Seidel and SOR methods, the order in which the variables are processed matter. A common ordering that can be used to solve the heat equation is red-black. The motivation for red-black is to order the nodes with flexibility for parallel implementation. Thinking of the matrix as a checkerboard, every red node only has black node as its neighbors and every black node only has red nodes as neighbors to its north, south, east, and west.
+When solving a system of linear equations in terms like the heat equation, the order in which the variables are processed matter. A common ordering that can be used to solve the heat equation is red-black. The motivation for red-black is to order the nodes with flexibility for parallelism. If we divide the matrix into red and black nodes, then we can cut the work for convergence. Thinking of the matrix as a checkerboard, every red node only has black node as its neighbors and every black node only has red nodes as neighbors to its north, south, east, and west.
 
-Each processor uses MPI to send its leftmost solution value to its left neighbor, and its rightmost solution value to its rightmost neighbor. Of course, each processor must then also receive the corresponding information that its neighbors send to it. (However, the first and last processor only have one neighbor, and use boundary condition information to determine the behavior of the solution at the node which is not next to another processor's node.)
-
-The naive way of setting up the information exchange works, but can be inefficient, since each processor sends a message and then waits for confirmation of receipt, which can't happen until some processor has moved to the "receive" stage, which only happens because the first or last processor doesn't have to receive information on a given step.
+\section{Implementation}
+For our serial implementation of red-black, we created a 1D array out of a 2D grid of L x L size. After setting the initial values, we set the periodic boundary conditions, cos for east and west and sin for north and south. With 10000 iterations, we tested the timing of convergence with red-black iterations in serial, with OpenMP, and MPI. 
 
 \subsection{Results}
+For each of the following results, we ran our implementation of red-black for 10000 iterations of width and height sizes, 200-500. The boundary conditions were periodic with cos for east and west and sin for north and south. We took the average of 5 runs for each of the cell's results. We produced data that shows the dissipation of heat at 2 sources.
 
-6 x86 nodes	Intel(R) Xeon (R) CPU 5140 @ 2.33 GHz	4	None
+4 cores - Intel(R) Xeon (R) CPU 5140 @ 2.33 GHz (g++)- Q2'06
+Grid-width O3-serial serial OpenMP-1 OpenMP-2 OpenMP-4 OpenMP-6
+500 51.975090 101.699300 108.623525 53.278993 31.700750 42.634615
 
+4 cores - Intel(R) Xeon (R) CPU 5140 @ 2.33 GHz (icpc)- Q2'06
+Grid-width O3-serial serial OpenMP-1 OpenMP-2 OpenMP-4 OpenMP-6 4-core-MPI
+500 54.552849 54.016116 194.844752 104.093136 56.230391 73.667957 32.827912
 
-Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz
-Grid width O3 serial OpenMP 1 OpenMP 2 OpenMP 4 OpenMP 6 OpenMP 8
+We tested the difference in performance between g++ and icpc compilers on the Intel Xeon 5140. As expected, the two compilers revealed a thread overhead when using one OpenMP thread compared to serial timing. Timing Unexpectedly, the O3 flag did not reveal any increase in red-black iteration performance speed. For our performance testing on this machine, we found it very odd that g++ performed faster than icpc overall. We believe that the red-black iteration code was fairly simple and not set up in a manner that could take advantage of the optimizations that the Intel compiler would automatically perform. OpenMP with six threads took a dip in performance because the machine had four physical cores, and we oversubscribed the system. Using MPI on a single node with four cores revealed an increase in performance, but the results were not as expected, which will be further explained in the MPI section. 
+
+8 cores - Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz (g++) - Q3'15
+Grid-width O3-serial serial OpenMP-1 OpenMP-2 OpenMP-4 OpenMP-6 OpenMP-8
 200	1.777515 5.744814 6.312971 4.074393 2.879406 3.249713 3.070884
-300 13.802623 14.530238 9.351418 5.852037 6.279566 5.192502
-400 26.119645 27.859169 16.943005 9.666216 10.646720 9.225139 
-500 47.987774 53.261593 26.744942 16.256034 17.950182 15.714957
+300 4.211191 13.802623 14.530238 9.351418 5.852037 6.279566 5.192502
+400 7.855748 26.119645 27.859169 16.943005 9.666216 10.646720 9.225139 
+500 14.446449 47.987774 53.261593 26.744942 16.256034 17.950182 15.714957
+
+For a laptop with 8 cores with hyperthreading, we received the same scaling trend with OpenMP as the where four OpenMP threads began to level off in timing. The laptop performed much better than the 2006 CPU, and we observed a serial result with the O3 flag that outperformed using eight OpenMP threads. 
 
 \begin{figure}
-\includegraphics[width=60mm]{heatmap.png}
-\caption{Result of applying red-black iteration.}
-\label{fig:heatmap}
+\includegraphics[width=60mm]{red-black-laptop-graph.png}
+\caption{Red-black iteration on Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz personal laptop.}
+\label{fig:redblack-laptop}
+\end{figure}
+
+scc1.bu.edu
+12 cores - Intel(R) Xeon(R) CPU E5-2640 0 @ 2.50GHz (g++) - Q1'12
+Grid-width O3-serial serial OpenMP-1 OpenMP-2 OpenMP-4 OpenMP-6 OpenMP-8 OpenMP-12
+500 61.803355 62.710953 62.282846 33.314232 18.077128 12.937805 10.898219 48.187879
+
+We ran the our implementation of red-black on a 12 core shared 2012 Intel Xeon CPU E5-2640. We were expecting better results than the personal laptop, but surprisingly, the personal laptop managed to outperform the 12 core machine. We suspect that other users of this shared CPU were taking some CPU utilization from out program. Oddly enough, the 03 flag did not improve performance, and the reason could be because the personal laptop had a latest CPU with a large cache size that could optimize the program with 03 whereas the 2012 CPU was a model with a lower cache size and architecture that could not effectively optimize the program when using the 03 flag. At twelve OpenMP threads, we noticed an performance dip in timing, which we suspect could be because of other users or programs using the machine during that particular run.
+
+\begin{figure}
+\includegraphics[width=60mm]{redblack-heatmap-2-source-periodic.png}
+\caption{Result of applying red-black iteration with 2 sources and periodic boundaries.}
+\label{fig:redblack-heatmap}
+\end{figure}
+
+\subsection{MPI}
+After formatting the 2D grid into an array, we wanted each processor to use MPI to send its leftmost solution value to its left neighbor, and its rightmost solution value to its rightmost neighbor. Each processor then would receive the corresponding information that its neighbors sent to it. The first and last processor would only have one neighbor and use the boundary condition information to determine the behavior of the solution at the node which is not next to another processor's node. In this manner, each processor sends a message and then waits for confirmation of a receipt.
+
+\subsection{Shortcomings}
+For the MPI version of red-black, we produced results that were inconsistent with our serial and OpenMP versions. We suspect that the reason for our inconsistent data was an improper sending and receiving from neighbor to neighbor on the 1D representation of our grid. As a result, although the data produces a pattern with 2 sources of dissipating heat, the numbers are clearly inconsistent with our serial and OpenMP versions.
+
+\begin{figure}
+\includegraphics[width=60mm]{incorrect-mpi-data.png}
+\caption{Result of MPI red-black iteration with 2 sources and periodic boundaries.}
+\label{fig:redblack-incorrect-mpi-heatmap}
 \end{figure}
 
 \section{Conjugate Gradient Method}
