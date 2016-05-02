@@ -1,16 +1,14 @@
 .SUFFIXES:
 .SUFFIXES: .o .cpp
 #============================================================
-TARGET	=  heat_mpi
+TARGET	=  main
 
-C_SOURCES =  main.cpp util.cpp core.cpp
-C_OBJS     =  main.o util.o core.o
-MY_INCLUDES =  main.h util.h core.h
-
+C_SOURCES =  main.cpp util.cpp core.cpp 
+C_OBJS     =   main.o util.o core.o
+MY_INCLUDES =  core.h util.h
 
 CCX = mpic++
 CXXFLAGS = -g -Wall
-LIBDIRS = -lm
 
 #============================================================
 all: $(TARGET)
@@ -31,7 +29,7 @@ clean:
 	rm -f $(TARGET) $(C_OBJS) core 
 
 tar: $(ALL_SOURCES) $(NOTES)
-	tar cvf $(TARGET).tar $(ALL_SOURCES)
+	tar cvf $(TARGET).tar $(ALL_SOURCES)  $(NOTES)
 
 $(TARGET).ps: $(ALL SOURCES)
 	enscript -pcode.ps $(ALL_SOURCES)
